@@ -4,6 +4,7 @@ import org.joml.Vector2f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL20;
 import renderer.Shader;
+import renderer.Texture;
 import util.Time;
 
 
@@ -21,12 +22,13 @@ public class LevelEditorScene extends Scene{
 
 //   private int vertexID, fragmentID, shaderProgram; //shader to i vertex i program
     private Shader defaultShader;
+    private Texture testTexture;
     private float[] vertexArray = {
-            // position                               // color
-            100.5f, 0.5f,  0.0f,                        1.0f, 0.0f, 0.0f, 1.0f, //Bottom right     0
-            0.5f, 100.5f,  0.0f,                        0.0f, 1.0f, 0.0f, 1.0f, //Top left   1
-            100.5f,  100.5f,  0.0f,                         1.0f, 0.0f, 1.0f, 1.0f, //Top right 2
-            0.5f, 0.5f, 0.0f,                       1.0f, 1.0f, 0.0f, 1.0f, //Bottom left 3
+            // position                               // color                      //UV Coordinates
+            100.5f, 0.5f,  0.0f,                    1.0f, 0.0f, 0.0f, 1.0f,         1, 1, //Bottom right     0
+            0.5f, 100.5f,  0.0f,                    0.0f, 1.0f, 0.0f, 1.0f,         0, 0, //Top left   1
+            100.5f,  100.5f,  0.0f,                 1.0f, 0.0f, 1.0f, 1.0f,         1, 0, //Top right 2
+            0.5f, 0.5f, 0.0f,                       1.0f, 1.0f, 0.0f, 1.0f,         0, 1 //Bottom left 3
 
 
     };
@@ -50,6 +52,7 @@ public class LevelEditorScene extends Scene{
         this.camera = new Camera(new Vector2f());
        defaultShader = new Shader("assets" + File.separator + "shaders" + File.separator + "default.glsl");
        defaultShader.compile();
+       this.testTexture = new Texture("assets/images/testImage.png");
         //===================================================
         // Generate VAO, VBO, and EBO buffer objects, and send to GPU
         //===================================================
@@ -78,16 +81,18 @@ public class LevelEditorScene extends Scene{
         int positionSize = 3; //three position
         int colorSize = 4; // bo r,g,b,a
         //size of a float is 4 bytes
-        int floatSizeBytes = 4;
-        int vertexSizeBytes = (positionSize + colorSize) * floatSizeBytes; // calculating vertex size, because Java doesn't do it
+        int uvSize = 2;
+        int vertexSizeBytes = (positionSize + colorSize + uvSize) * Float.BYTES; // calculating vertex size, because Java doesn't do it
         glVertexAttribPointer(0,positionSize, GL_FLOAT, false, vertexSizeBytes, 0);
         //skladnia   =        atrybut = 0,size,   jaki typ,  moze byc false/true, how long to next vertex in bytes, pointer which is offset)
         //why 0? in glsl we said location is 0
         glEnableVertexAttribArray(0); //enable
-        glVertexAttribPointer(1, colorSize, GL_FLOAT, false, vertexSizeBytes, positionSize * floatSizeBytes);
+        glVertexAttribPointer(1, colorSize, GL_FLOAT, false, vertexSizeBytes, positionSize * Float.BYTES);
         //positionSize because we moved position, and it has to be in bytes
         glEnableVertexAttribArray(1);
 
+        glVertexAttribPointer(2,uvSize, GL_FLOAT, false, vertexSizeBytes, (positionSize+ colorSize) * Float.BYTES);
+        glEnableVertexAttribArray(2);
     }
 
     @Override
@@ -95,6 +100,12 @@ public class LevelEditorScene extends Scene{
         camera.position.x -= dt * 50.0f;
         camera.position.y -= dt * 20.0f;
         defaultShader.use();
+
+        // Upload texture to shader
+        defaultShader.uploadTexture("TEX_SAMPLER", 0); //upload what we have under ID 0
+        glActiveTexture(GL_TEXTURE0); //activating slot 0
+        testTexture.bind(); //pushes it into slot 0 in shader
+
         defaultShader.uploadMat4f("uProjection", camera.getProjectionMatrix());
         defaultShader.uploadMat4f("uView", camera.getViewMatrix());
         defaultShader.uploadFloat("uTime", Time.getTime());

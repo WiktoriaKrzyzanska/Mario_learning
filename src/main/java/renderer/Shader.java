@@ -160,4 +160,9 @@ public class Shader {
         use();
         glUniform1i(varLocation, val); // this code is repetitive. The only difference is changing f (float) for i (integer)
     }
+    public void uploadTexture(String varName, int slot){
+        int varLocation = glGetUniformLocation(shaderProgramID, varName);
+        use();
+        glUniform1f(varLocation, slot);
+    }
 }
