@@ -1,5 +1,6 @@
 package jade;
 
+import org.joml.Vector2f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL20;
 import renderer.Shader;
@@ -17,14 +18,14 @@ import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 public class LevelEditorScene extends Scene{
 
-   private int vertexID, fragmentID, shaderProgram; //shader to i vertex i program
+//   private int vertexID, fragmentID, shaderProgram; //shader to i vertex i program
     private Shader defaultShader;
     private float[] vertexArray = {
             // position                               // color
-            0.5f, -0.5f,  0.0f,                        1.0f, 0.0f, 0.0f, 1.0f, //Bottom right     0
-            -0.5f, 0.5f,  0.0f,                        0.0f, 1.0f, 0.0f, 1.0f, //Top left   1
-            0.5f,  0.5f,  0.0f,                         1.0f, 0.0f, 1.0f, 1.0f, //Top right 2
-            -0.5f, -0.5f, 0.0f,                       1.0f, 1.0f, 0.0f, 1.0f, //Bottom left 3
+            100.5f, 0.5f,  0.0f,                        1.0f, 0.0f, 0.0f, 1.0f, //Bottom right     0
+            0.5f, 100.5f,  0.0f,                        0.0f, 1.0f, 0.0f, 1.0f, //Top left   1
+            100.5f,  100.5f,  0.0f,                         1.0f, 0.0f, 1.0f, 1.0f, //Top right 2
+            0.5f, 0.5f, 0.0f,                       1.0f, 1.0f, 0.0f, 1.0f, //Bottom left 3
 
 
     };
@@ -45,6 +46,7 @@ public class LevelEditorScene extends Scene{
     }
     @Override
     public void init(){
+        this.camera = new Camera(new Vector2f());
        defaultShader = new Shader("assets" + File.separator + "shaders" + File.separator + "default.glsl");
        defaultShader.compile();
         //===================================================
@@ -89,7 +91,10 @@ public class LevelEditorScene extends Scene{
 
     @Override
     public void update(float dt) {
+        camera.position.x -= dt * 50.0f;
         defaultShader.use();
+        defaultShader.uploadMat4f("uProjection", camera.getProjectionMatrix());
+        defaultShader.uploadMat4f("uView", camera.getViewMatrix());
         //Bind the VAO that we're using
         glBindVertexArray(vaoID);
         //Enable the vertex attribute pointers

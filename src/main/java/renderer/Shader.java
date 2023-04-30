@@ -116,4 +116,12 @@ public class Shader {
     public void detach(){
         glUseProgram(0);
     }
+    public void uploadMat4f(String varName, Matrix4f mat4){
+        int varlocation = glGetUniformLocation(shaderProgramID, varName);
+        FloatBuffer matBuffer = BufferUtils.createFloatBuffer(16); //16 because we have 4x4 matrix
+        mat4.get(matBuffer);
+        glUniformMatrix4fv(varlocation, false, matBuffer);
+
+
+    }
 }
