@@ -4,6 +4,7 @@ import org.joml.Vector2f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL20;
 import renderer.Shader;
+import util.Time;
 
 
 import java.awt.event.KeyEvent;
@@ -92,9 +93,11 @@ public class LevelEditorScene extends Scene{
     @Override
     public void update(float dt) {
         camera.position.x -= dt * 50.0f;
+        camera.position.y -= dt * 20.0f;
         defaultShader.use();
         defaultShader.uploadMat4f("uProjection", camera.getProjectionMatrix());
         defaultShader.uploadMat4f("uView", camera.getViewMatrix());
+        defaultShader.uploadFloat("uTime", Time.getTime());
         //Bind the VAO that we're using
         glBindVertexArray(vaoID);
         //Enable the vertex attribute pointers
