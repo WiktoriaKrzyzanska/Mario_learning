@@ -1,5 +1,7 @@
 package jade;
 
+import components.FontRenderer;
+import components.SpriteRenderer;
 import org.joml.Vector2f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL20;
@@ -23,6 +25,8 @@ public class LevelEditorScene extends Scene{
 //   private int vertexID, fragmentID, shaderProgram; //shader to i vertex i program
     private Shader defaultShader;
     private Texture testTexture;
+    GameObject testObj;
+    private boolean firstTime = false;
     private float[] vertexArray = {
             // position                               // color                      //UV Coordinates
             100.5f, 0.5f,  0.0f,                    1.0f, 0.0f, 0.0f, 1.0f,         1, 1, //Bottom right     0
@@ -49,6 +53,11 @@ public class LevelEditorScene extends Scene{
     }
     @Override
     public void init(){
+        System.out.println("Creating test object");
+        this.testObj = new GameObject("test object");
+        this.testObj.addComponent(new SpriteRenderer());
+        this.testObj.addComponent(new FontRenderer());
+        this.addGameObjectToScene(this.testObj); // adding to the scene
         this.camera = new Camera(new Vector2f());
        defaultShader = new Shader("assets" + File.separator + "shaders" + File.separator + "default.glsl");
        defaultShader.compile();
@@ -122,5 +131,16 @@ public class LevelEditorScene extends Scene{
 
         glBindVertexArray(0); //0 means binds nothing
         defaultShader.detach();
+
+        if(!firstTime) {
+            System.out.println("Creating gameObject");
+            GameObject go = new GameObject("Game Test 2");
+            go.addComponent(new SpriteRenderer());
+            this.addGameObjectToScene(go);
+            firstTime = true;
+        }
+        for (GameObject go : this.gameObjects){
+            go.update(dt);
+        }
     }
 }
